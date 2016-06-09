@@ -1,0 +1,12 @@
+{
+  "name": "jquery-ui.min",
+  "_cacheHeaders": {
+    "Last-Modified": "Fri, 13 Nov 2015 20:11:30 GMT",
+    "Content-Type": "application/javascript; charset=utf-8"
+  },
+  "main": "index.js",
+  "_source": "http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js",
+  "_target": "*",
+  "_originalSource": "http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js",
+  "_direct": true
+}

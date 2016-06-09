@@ -1,0 +1,12 @@
+{
+  "name": "jquery.min",
+  "_cacheHeaders": {
+    "Last-Modified": "Fri, 13 Nov 2015 20:11:29 GMT",
+    "Content-Type": "application/javascript; charset=utf-8"
+  },
+  "main": "index.js",
+  "_source": "http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js",
+  "_target": "*",
+  "_originalSource": "http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js",
+  "_direct": true
+}
