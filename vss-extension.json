@@ -1,9 +1,9 @@
 ﻿{
   "manifestVersion": 1,
-  "id": "rm-deployment-status-enhancer-summary",
+  "id": "Deployment-WorkFlow",
   "version": "0.1.8",
   "name": "RM deployment status - summary",
-  "description": "RM summary section extension sample",
+  "description": "RM summary section extension",
   "publisher": "t-moazim",
   "public":  false,
   "links": {
@@ -11,6 +11,14 @@
       "uri": "https://github.com/Microsoft/vso-extension-samples"
     }
   },
+  "icons": {
+        "default": "images/export-import.jpg"
+    },
+  "content": {
+        "details": {
+            "path": "overview.md"
+        }
+    },
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"
@@ -39,13 +47,16 @@
     }
   ],
   "screenshots": [
-    {
-      "path": "images/screenshot1.png"
-    },
-    {
-      "path": "images/screenshot2.png"
-    }
-  ],
+    	{
+      		"path": "images/Details.png"
+    	},
+    	{
+      		"path": "images/Changeworkflow.png"
+    	},
+    	{
+      		"path": "images/info.png"
+    	}
+    ],	
   "files": [
     {
       "path": "index.html",
@@ -62,6 +73,27 @@
     {
       "path": "bower_components/vss-web-extension-sdk/lib/VSS.SDK.js",
       "addressable": true
+    },
+    {
+        "path": "images/Details.png", "addressable": true
+    },
+    {
+        "path": "images/Changeworkflow.png", "addressable": true
+    }, 
+    {
+        "path": "images/info.png", "addressable": true
+    },
+    {
+        "path": "images/icon-clone-16.png", "addressable": true
+    },		 
+    {
+        "path": "images/icon-export-16.png", "addressable": true
+    }, 
+    {
+        "path": "images/icon-import-16.png", "addressable": true
+    },
+    {
+        "path": "images/Readme.png", "addressable": true
     }
   ]
 }
