@@ -41,48 +41,6 @@ function CalculateLevel(dependency)
 
 }
 
-function GetEnvironmentStatus(currentStatus, status, state)
-{
-    switch (currentStatus) {
-        case 0:
-            state += 'Unknown';
-            break;
-        case 1:
-            state += 'Not Started';
-            status = 'notStarted';
-            break;
-        case 2:
-            state += 'In Progress';
-            status = 'running';
-            break;
-        case 4:
-            state += 'Succeeded';
-            status = 'succeeded';
-            break;
-        case 16:
-            state += 'Rejected';
-            status = 'failed';
-            break;
-
-        case 8:
-            state += 'Cancelled';
-            status = 'failed';
-            break;
-        case 32:
-            state += 'Queued';
-            status = 'running';
-            break;
-
-        case 64:
-            state += 'Scheduled';
-            status = 'scheduled';
-            break;
-
-        default:
-            state += 'Unknown';
-    };
-
-}
 
 function DrawGraph()
 {
