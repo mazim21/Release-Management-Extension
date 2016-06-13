@@ -11,18 +11,17 @@
     }
 }
 
-var arr_obj = new Array();                  //Global array containing all objects of class releasedEnvironment
-var count = 0;                                        //Number of Environments 
-var release_name, level, maxLevel = 0;              // level : position of current environment in the graph
-var pre = 0, post = 0;
+var ReleasedEnvironments = new Array();                 
+var totalNoOfReleasedEnvironments = 0;                                        
+var release_name, levelOfEnvironment, maxLevel = 0;              // levelOfEnvironment : position of current environment in the graph
+
 
 function CreateReleaseStartedNode()
 {
     $('#environments').empty();
 
     var startNode = $('<div/>', {
-        id: "start",
-
+        id: "start"
     });
     $('#environments').append(startNode);
 
@@ -31,10 +30,12 @@ function CreateReleaseStartedNode()
 
 function CalculateLevel(dependency)
 {
-    for (var s in arr_obj) {
-        if (dependency == arr_obj[s].name) {
-            if (level < arr_obj[s].level)
-                level = arr_obj[s].level;
+    for (var environment in ReleasedEnvironments)
+    {
+        if (dependency == ReleasedEnvironments[environment].name)
+        {
+            if (levelOfEnvironment < ReleasedEnvironments[environment].level)
+                levelOfEnvironment = ReleasedEnvironments[environment].level;
             break;
         }
     }
@@ -44,72 +45,83 @@ function CalculateLevel(dependency)
 
 function DrawGraph()
 {
-    var objCnt = 0, lvl = 1;
+    var releasedEnvironmentCount = 0, levelOfEnvironment = 1;
 
     var shiftTop = 30, shiftLeft = 30;
 
-    while (objCnt < count) {
-        for (var k in arr_obj) {
-            var off = 0;
-            if (lvl == arr_obj[k].level) {
-                if (arr_obj[k].preapproval_list.length == 0)
-                    off = 15;
-                else
-                    off = 0;
-                $("#" + arr_obj[k].name).offset({ top: shiftTop, left: shiftLeft + off });
-                objCnt++;
-                shiftTop += 40;
-            }
+    while (releasedEnvironmentCount < totalNoOfReleasedEnvironments)
+    {
+        for (var environment in ReleasedEnvironments)
+        {
+            var shiftLeftOffset = 0;
+                if (levelOfEnvironment == ReleasedEnvironments[environment].level)
+                {
+                    if (ReleasedEnvironments[environment].preapproval_list.length == 0)
+                    shiftLeftOffset = 15;
+                    else
+                    shiftLeftOffset = 0;
+                     $("#" + ReleasedEnvironments[environment].name).offset({ top: shiftTop, left: shiftLeft + shiftLeftOffset });
+                     releasedEnvironmentCount++;
+                        shiftTop += 40;
+                }
 
         }
 
         shiftLeft += 74;
         shiftTop = 30;
-        lvl++;
+        levelOfEnvironment++;
 
     }
-
 
 }
 
 function ConnectNodes()
 {
-    jsPlumb.ready(function () {
-        var k = 0;
+    jsPlumb.ready(function ()
+    {
+        var connectorType = "Straight";
+        var endpointType = "Blank";
+        var anchorLeft = "Left", anchorRight = "Right";
+        var releasedEnvironmentCount = 0;
+        var connectorColor = "lightgray";
+        var endpointOutlineColor = "gray";
         var common =
            {
-               connector: ["Straight"],
-               anchor: ["Left", "Right"],
-               endpoint: "Blank"
+               connector: [connectorType],
+               anchor: [anchorLeft, anchorRight],
+               endpoint: endpointType
            };
 
-        while (k < count) {
-            var innLoop = 0;
-            if (arr_obj[k].dependencies[innLoop] != "ReleaseStarted") {
-                while (innLoop < arr_obj[k].dependencies.length) {
+        while (releasedEnvironmentCount < totalNoOfReleasedEnvironments)
+        {
+            var dependencyCount = 0;
+            if (ReleasedEnvironments[releasedEnvironmentCount].dependencies[dependencyCount] != "ReleaseStarted")
+            {
+                while (dependencyCount < ReleasedEnvironments[releasedEnvironmentCount].dependencies.length)
+                {
                     jsPlumb.connect({
-                        source: arr_obj[k].dependencies[innLoop],
-                        target: arr_obj[k].name,
-                        paintStyle: { strokeStyle: "lightgray", lineWidth: 3 },
-                        endpointStyle: { fillStyle: "lightgray", outlineColor: "gray" }
+                        source: ReleasedEnvironments[releasedEnvironmentCount].dependencies[dependencyCount],
+                        target: ReleasedEnvironments[releasedEnvironmentCount].name,
+                        paintStyle: { strokeStyle: connectorColor, lineWidth: 3 },
+                        endpointStyle: { fillStyle: connectorColor, outlineColor: endpointOutlineColor }
 
                     }, common);
-                    innLoop++;
+                    dependencyCount++;
                 }
 
             }
             else {
-                jsPlumb.connect({
-                    source: "start",
-                    target: arr_obj[k].name,
-                    paintStyle: { strokeStyle: "lightgray", lineWidth: 3 },
-                    endpointStyle: { fillStyle: "lightgray", outlineColor: "gray" }
+                        jsPlumb.connect({
+                        source: "start",
+                        target: ReleasedEnvironments[releasedEnvironmentCount].name,
+                        paintStyle: { strokeStyle: connectorColor, lineWidth: 3 },
+                        endpointStyle: { fillStyle: connectorColor, outlineColor: endpointOutlineColor }
 
-                }, common);
-            }
-            k++;
-        }  //End of while
-                
+                        }, common);
+                }
+            releasedEnvironmentCount++;
+      }  //End of while
+
     }); //End of Jsready
 
 
@@ -118,6 +130,8 @@ function ConnectNodes()
 
 VSS.ready(function () {
     var c = VSS.getConfiguration();
+
+   
 
     c.onReleaseChanged(function (release) {
 
@@ -130,97 +144,103 @@ VSS.ready(function () {
             var status = 'pending';
             var dependencies = new Array();                 //Contains dependencies of current environment
 
-            var i = 0;
-            var k = 0;
-            level = 0;                                      // Initializing level to 0 
+            var dependencyIndex = 0;
+            var dependencyCount = 0;
+            levelOfEnvironment = 0;                                      // Initializing level to 0 
 
             //Calculating Level of current Environment and storing Dependencies
-            
-            while (k < env.conditions.length)
+
+            while (dependencyCount < env.conditions.length)
             {
-                dependencies[i] = env.conditions[k].name;
+                dependencies[dependencyIndex] = env.conditions[dependencyCount].name;
 
-                if (env.conditions[0].name == "ReleaseStarted")
-                {
-                    level = 1;
+                if (env.conditions[0].name == "ReleaseStarted") {
+                    levelOfEnvironment = 1;
                 }
-                else
-                {
-                    CalculateLevel(dependencies[i]);
+                else {
+                    CalculateLevel(dependencies[dependencyIndex]);
                 }
 
-                i++;
-                k++;
+                dependencyIndex++;
+                dependencyCount++;
             }
 
             if (env.conditions[0].name == "ReleaseStarted")
-                level = 1;
+                levelOfEnvironment = 1;
             else
-                level = level + 1;
+                levelOfEnvironment = levelOfEnvironment + 1;
 
-            var app = 0;
+            var countOFApprovers = 0;
             var preapproval_list = new Array();                      //List of preApprovers of current Environment
             var postapproval_list = new Array();                     //List of postApprovers of current Environment
 
             //Storing List of PreApprovers
-            while (app < env.preApprovalsSnapshot.approvals.length && env.preApprovalsSnapshot.approvals[0].isAutomated == false) {
+            while (countOFApprovers < env.preApprovalsSnapshot.approvals.length && env.preApprovalsSnapshot.approvals[0].isAutomated == false) {
 
-                preapproval_list[app] = env.preApprovalsSnapshot.approvals[app].approver.displayName;
-                app++;
+                preapproval_list[countOFApprovers] = env.preApprovalsSnapshot.approvals[countOFApprovers].approver.displayName;
+                countOFApprovers++;
 
             }
 
-            app = 0;
+            countOFApprovers = 0;
 
             //Storing List of PostApprovers
-            while (app < env.postApprovalsSnapshot.approvals.length && env.postApprovalsSnapshot.approvals[0].isAutomated == false) {
+            while (countOFApprovers < env.postApprovalsSnapshot.approvals.length && env.postApprovalsSnapshot.approvals[0].isAutomated == false) {
 
-                postapproval_list[app] = env.postApprovalsSnapshot.approvals[app].approver.displayName;
-                app++;
+                postapproval_list[countOFApprovers] = env.postApprovalsSnapshot.approvals[countOFApprovers].approver.displayName;
+                countOFApprovers++;
             }
 
-            switch (env.status) {
-                case 0:
-                    state += 'Unknown';
-                    break;
-                case 1:
-                    state += 'Not Started';
-                    status = 'notStarted';
-                    break;
-                case 2:
-                    state += 'In Progress';
-                    status = 'running';
-                    break;
-                case 4:
-                    state += 'Succeeded';
-                    status = 'succeeded';
-                    break;
-                case 16:
-                    state += 'Rejected';
-                    status = 'failed';
-                    break;
 
-                case 8:
-                    state += 'Cancelled';
-                    status = 'failed';
-                    break;
-                case 32:
-                    state += 'Queued';
-                    status = 'running';
-                    break;
+          
+                switch (env.status) {
+                    case 0:
+                        state += 'Unknown';
+                        break;
+                    case 1:
+                        state += 'Not Started';
+                        status = 'notStarted';
+                        break;
+                    case 2:
+                        state += 'In Progress';
+                        status = 'running';
+                        break;
+                      
+                    case 4:
+                        state += 'Succeeded';
+                        status = 'succeeded';
+                        break;
+                    case 16:
+                        state += 'Rejected';
+                        status = 'failed';
+                        break;
 
-                case 64:
-                    state += 'Scheduled';
-                    status = 'scheduled';
-                    break;
+                    case 8:
+                        state += 'Cancelled';
+                        status = 'failed';
+                        break;
+                    case 32:
+                        state += 'Queued';
+                        status = 'pending';
+                        break;
 
-                default:
-                    state += 'Unknown';
-            };
+                    case 64:
+                        state += 'Scheduled';
+                        status = 'scheduled';
+                        break;
+
+                    default:
+                        state += 'Unknown';
+                };
+            //  });
+
             
+                var preApprovalNodeId = "pre" + env.id;
+                var postApprovalNodeId = "pos" + env.id;
+
             //Creating Node for preApproval
             var preApprovalNode = $('<div/>', {
-                id: pre,
+                id: preApprovalNodeId,
                 class: 'preApproval ' + status,
 
             });
@@ -235,7 +255,7 @@ VSS.ready(function () {
 
             //Creating Node for postApproval
             var postApprovalNode = $('<div/>', {
-                id: post,
+                id: postApprovalNodeId,
                 class: 'postApproval ' + status,
 
             });
@@ -243,7 +263,7 @@ VSS.ready(function () {
             var current = $('<div/>', {
                 id: env.name,
                 class: 'container '
-                
+
             });
 
             $('#environments').append(current);
@@ -255,20 +275,21 @@ VSS.ready(function () {
 
             if (env.postApprovalsSnapshot.approvals[0].isAutomated == false)
                 $('#' + env.name).append(postApprovalNode);
-            
-            pre++;
-            post++;
+
+           
 
             //Creating the Object of current Environment
-            const ob = new releasedEnvironment(env.name, env.id, dependencies, preapproval_list, postapproval_list, level);
-            
-            arr_obj[count] = ob;
-            
-            count++;
+            const releasedEnvironmentObject = new releasedEnvironment(env.name, env.id, dependencies, preapproval_list, postapproval_list, levelOfEnvironment);
+
+            ReleasedEnvironments[totalNoOfReleasedEnvironments] = releasedEnvironmentObject;
+
+            totalNoOfReleasedEnvironments++;
 
             //Calculating Maximum No. of Levels
-            if (maxLevel < level)
-                maxLevel = level;
+            if (maxLevel < levelOfEnvironment)
+                maxLevel = levelOfEnvironment;
+
+
 
         }); //End of ForEach
 
@@ -277,55 +298,96 @@ VSS.ready(function () {
 
         DrawGraph();
 
+        //OnRightClick Pop up Menu
+        $(function () {
+            $('.container').contextPopup({
+                items: [
+                  { label: 'Option', action: function () { alert('clicked 1') } },
+                  { label: 'Another Thing', action: function () { alert('clicked 2') } },
+                  { label: 'Blah Blah', action: function () { alert('clicked 3') } }
+                ]
+            });
+        });
+
+
         //Hover Function
 
-        $('.container').hover(function ()
+        $('.environment').hover(function ()
         {
 
-            for (var l in arr_obj)
+            for (var releasedEnvironmentIndex in ReleasedEnvironments)
             {
-                var temp_obj = arr_obj[l];
+                var releasedEnvironment = ReleasedEnvironments[releasedEnvironmentIndex];
 
-                var s = "Environment: ";
+                var EnvironmentInformation = "Environment: ";
 
-                if (temp_obj.name == this.id)
+                if (releasedEnvironment.id == this.id)
                 {
 
-                        s = s + temp_obj.name + "<br>" + "PreApprover: ";
+                    EnvironmentInformation = EnvironmentInformation + releasedEnvironment.name + "<br>" + "PreApprover: ";
 
-                        if (temp_obj.preapproval_list.length != 0)
-                        {
-                            for (var k in temp_obj.preapproval_list)
-                            {
-                                s = s + temp_obj.preapproval_list[k];
-                            }
-                        }
-
-                    s = s + "<br>" + "PostApprover: ";
-
-                    if (temp_obj.postapproval_list.length != 0)
+                    if (releasedEnvironment.preapproval_list.length != 0)
                     {
-                            for (var a in temp_obj.postapproval_list)
-                            {
-                                s = s + temp_obj.postapproval_list[a];
-                            }
+                        for (var approver in releasedEnvironment.preapproval_list) {
+                            EnvironmentInformation = EnvironmentInformation + releasedEnvironment.preapproval_list[approver];
+                        }
                     }
-                    s = s + "<br>";
 
-                    s = s + "Release: " + release_name + "<br>";
-                    document.getElementById('details').innerHTML = s;
+                    EnvironmentInformation = EnvironmentInformation + "<br>" + "PostApprover: ";
+
+                    if (releasedEnvironment.postapproval_list.length != 0)
+                    {
+                        for (var approver in releasedEnvironment.postapproval_list) {
+                            EnvironmentInformation = EnvironmentInformation + releasedEnvironment.postapproval_list[approver];
+                        }
+                    }
+                    EnvironmentInformation = EnvironmentInformation + "<br>";
+
+                    EnvironmentInformation = EnvironmentInformation + "Release: " + release_name + "<br>";
+                    document.getElementById('details').innerHTML = EnvironmentInformation;
 
                     break;
                 }
 
             }
+
         },
-        function ()
+        function () {
+            document.getElementById('details').innerHTML = "";
+
+        }
+        
+        );
+
+        $('.container').click(function (event)
         {
-            document.getElementById('details').innerHTML = " ";
+            if (event.target != this)
+            {
+                
+
+                for (var releasedEnvironmentIndex in ReleasedEnvironments)
+                {
+                        var releasedEnvironment = ReleasedEnvironments[releasedEnvironmentIndex];
+                            if ((event.target.id == "pre" + releasedEnvironment.id) || (event.target.id == "pos" + releasedEnvironment.id ))
+                           {
+                                if( event.target.id[1] == 'r' )
+                                {
+                                     alert('pre');
+                                }
+                            else
+                                {
+                                alert('post');
+                                }
+                          }
+                }
+                
+            } 
+            else {
+                alert('You actually clicked #container itself.');
+            }
         });
 
-        
+
         ConnectNodes();           //Connecting nodes using Jsplumb connect function
 
     }); //End of onReleaseChanged

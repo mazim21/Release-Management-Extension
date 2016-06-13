@@ -13,19 +13,21 @@
 
     <script src="scripts/jquery.jsPlumb-1.4.1-all-min.js"></script>
 
+    <script src="scripts/jquery-1.11.2.min.js"></script>
+    <script src="scripts/jquery.contextmenu.js"></script>
+    <link rel="stylesheet" href="scripts/jquery.contextmenu.css">
 
     <style>
         #environments {
             overflow: visible;
-            margin-top:30px;
+            margin-top: 30px;
         }
 
-        #start
-        {
-            background-color:yellow;
-            height:15px;
-            width:15px;
-            border-radius:15px;
+        #start {
+            background-color: yellow;
+            height: 15px;
+            width: 15px;
+            border-radius: 15px;
         }
 
         #details {
@@ -33,11 +35,13 @@
             overflow: visible;
             position: relative;
             background-color: white;
-            box-shadow:1px 1px;
+            box-shadow: 1px 1px;
+            margin-bottom:5px;
         }
+         
 
         .environment {
-            width: 25px;
+            width: 30px;
             height: 5px;
             float: left;
             padding-left: 10px;
@@ -48,40 +52,28 @@
             margin-right: 2px;
         }
 
-         
-        environment.text {
-            position: relative;
-            bottom: 0px;
-        } 
         .container {
             margin-bottom: 20px;
             display: inline-block;
-        } 
+        }
 
-
-        .preApproval
-		{
-			width: 15px;
+        .preApproval {
+            width: 15px;
             height: 15px;
             float: left;
-		    border-top-left-radius: 5px 5px;
-			border-bottom-left-radius: 5px 5px;
-			margin-right: 2px;
-		}
-		
-		.postApproval
-		{
-			width: 15px;
-            height: 15px;
-            float:left;
-		    -webkit-border-top-right-radius: 5px 5px;
-			-webkit-border-bottom-right-radius: 5px 5px;
-			
-			margin-right: 0px;
-			 
-		}
-        
+            border-top-left-radius: 5px 5px;
+            border-bottom-left-radius: 5px 5px;
+            margin-right: 2px;
+        }
 
+        .postApproval {
+            width: 15px;
+            height: 15px;
+            float: left;
+            -webkit-border-top-right-radius: 5px 5px;
+            -webkit-border-bottom-right-radius: 5px 5px;
+            margin-right: 0px;
+        }
 
         .succeeded {
             background-color: green;
@@ -92,7 +84,7 @@
         }
 
         .pending {
-            background-color: #eee;
+            background-color: darkblue;
         }
 
         .running {
@@ -109,7 +101,9 @@
     </style>
 </head>
 <body>
-    <div id="environments"></div>
+    <div id="environments">
+
+    </div>
 
     <div id="details"></div>
 
