@@ -1,5 +1,5 @@
-﻿class releasedEnvironment {
-
+﻿class releasedEnvironment
+{
     constructor(name, id, dependencies, preapproval_list, postapproval_list, level) {
         this.name = name;
         this.id = id;
@@ -7,7 +7,6 @@
         this.preapproval_list = preapproval_list;
         this.postapproval_list = postapproval_list;
         this.level = level;
-
     }
 }
 
@@ -28,6 +27,7 @@ function CreateReleaseStartedNode()
 
 }
 
+
 function CalculateLevel(dependency)
 {
     for (var environment in ReleasedEnvironments)
@@ -47,32 +47,31 @@ function DrawGraph()
 {
     var releasedEnvironmentCount = 0, levelOfEnvironment = 1;
 
-    var shiftTop = 30, shiftLeft = 30;
+    var shiftTop = 30, shiftLeft = 30;                                                                      
 
     while (releasedEnvironmentCount < totalNoOfReleasedEnvironments)
     {
-        for (var environment in ReleasedEnvironments)
+        for (var environment in ReleasedEnvironments)                                                      //Draw Environments Level-Wise
         {
             var shiftLeftOffset = 0;
-                if (levelOfEnvironment == ReleasedEnvironments[environment].level)
+                if (levelOfEnvironment == ReleasedEnvironments[environment].level)                         //Search for Environment whose level matches with current level
                 {
                     if (ReleasedEnvironments[environment].preapproval_list.length == 0)
                     shiftLeftOffset = 15;
                     else
-                    shiftLeftOffset = 0;
+                        shiftLeftOffset = 0;
+
                      $("#" + ReleasedEnvironments[environment].name).offset({ top: shiftTop, left: shiftLeft + shiftLeftOffset });
                      releasedEnvironmentCount++;
-                        shiftTop += 40;
+                        shiftTop += 40;                                                                     //Creating environments on Same Level
                 }
 
         }
 
-        shiftLeft += 74;
+        shiftLeft += 74;                                                                                    //Shift to next level
         shiftTop = 30;
-        levelOfEnvironment++;
-
+        levelOfEnvironment++;                                                                               //Move to next level
     }
-
 }
 
 function ConnectNodes()
@@ -85,9 +84,9 @@ function ConnectNodes()
         var releasedEnvironmentCount = 0;
         var connectorColor = "lightgray";
         var endpointOutlineColor = "gray";
-        var common =
+        var common =                                                                            
            {
-               connector: [connectorType],
+               connector: [connectorType],                                                                                  //Type of conection
                anchor: [anchorLeft, anchorRight],
                endpoint: endpointType
            };
@@ -95,23 +94,24 @@ function ConnectNodes()
         while (releasedEnvironmentCount < totalNoOfReleasedEnvironments)
         {
             var dependencyCount = 0;
-            if (ReleasedEnvironments[releasedEnvironmentCount].dependencies[dependencyCount] != "ReleaseStarted")
+            if (ReleasedEnvironments[releasedEnvironmentCount].dependencies[dependencyCount] != "ReleaseStarted")           //Check if it is Level 1 node
             {
                 while (dependencyCount < ReleasedEnvironments[releasedEnvironmentCount].dependencies.length)
                 {
                     jsPlumb.connect({
-                        source: ReleasedEnvironments[releasedEnvironmentCount].dependencies[dependencyCount],
-                        target: ReleasedEnvironments[releasedEnvironmentCount].name,
-                        paintStyle: { strokeStyle: connectorColor, lineWidth: 3 },
-                        endpointStyle: { fillStyle: connectorColor, outlineColor: endpointOutlineColor }
+                                source: ReleasedEnvironments[releasedEnvironmentCount].dependencies[dependencyCount],        
+                                target: ReleasedEnvironments[releasedEnvironmentCount].name,                                 //Connect Nodes dependent to current node                   
+                                paintStyle: { strokeStyle: connectorColor, lineWidth: 3 },
+                                endpointStyle: { fillStyle: connectorColor, outlineColor: endpointOutlineColor }
 
                     }, common);
+
                     dependencyCount++;
                 }
 
             }
             else {
-                        jsPlumb.connect({
+                        jsPlumb.connect({                                                                            //Connect Start node to All first level nodes
                         source: "start",
                         target: ReleasedEnvironments[releasedEnvironmentCount].name,
                         paintStyle: { strokeStyle: connectorColor, lineWidth: 3 },
@@ -128,11 +128,12 @@ function ConnectNodes()
 }
 
 
+VSS.require(["ReleaseManagement/Core/Contracts"], function (RM_Contracts) {
+
 VSS.ready(function () {
     var c = VSS.getConfiguration();
 
    
-
     c.onReleaseChanged(function (release) {
 
         release_name = release.definitionName;
@@ -191,70 +192,67 @@ VSS.ready(function () {
                 countOFApprovers++;
             }
 
+            
+            switch (env.status) {
+                case RM_Contracts.EnvironmentStatus.Undefined:
+                    state += 'Unknown';
+                    break;
+                case RM_Contracts.EnvironmentStatus.NotStarted:
+                    state += 'Not Started';
+                    status = 'notStarted';
+                    break;
+                case RM_Contracts.EnvironmentStatus.InProgress:
+                    state += 'In Progress';
+                    status = 'running';
+                    break;
+                case RM_Contracts.EnvironmentStatus.Succeeded:
+                    state += 'Succeeded';
+                    status = 'succeeded';
+                    break;
+                case RM_Contracts.EnvironmentStatus.Rejected:
+                    state += 'Rejected';
+                    status = 'failed';
+                    break;
 
-          
-                switch (env.status) {
-                    case 0:
-                        state += 'Unknown';
-                        break;
-                    case 1:
-                        state += 'Not Started';
-                        status = 'notStarted';
-                        break;
-                    case 2:
-                        state += 'In Progress';
-                        status = 'running';
-                        break;
-                      
-                    case 4:
-                        state += 'Succeeded';
-                        status = 'succeeded';
-                        break;
-                    case 16:
-                        state += 'Rejected';
-                        status = 'failed';
-                        break;
+                case RM_Contracts.EnvironmentStatus.Canceled:
+                    state += 'Cancelled';
+                    status = 'failed';
+                    break;
+                case RM_Contracts.EnvironmentStatus.Queued:
+                    state += 'Queued';
+                    status = 'pending';
+                    break;
 
-                    case 8:
-                        state += 'Cancelled';
-                        status = 'failed';
-                        break;
-                    case 32:
-                        state += 'Queued';
-                        status = 'pending';
-                        break;
+                case RM_Contracts.EnvironmentStatus.Scheduled:
+                    state += 'Scheduled';
+                    status = 'scheduled';
+                    break;
 
-                    case 64:
-                        state += 'Scheduled';
-                        status = 'scheduled';
-                        break;
-
-                    default:
-                        state += 'Unknown';
-                };
-            //  });
+                default:
+                    state += 'Unknown';
+            };
 
             
                 var preApprovalNodeId = "pre" + env.id;
                 var postApprovalNodeId = "pos" + env.id;
 
-            //Creating Node for preApproval
+            
             var preApprovalNode = $('<div/>', {
-                id: preApprovalNodeId,
+                id: preApprovalNodeId,                                                              //Creating Node for preApproval
                 class: 'preApproval ' + status,
 
             });
 
-            //Creating Node for the Current environment in Graph
+            
 
             var EnvNode = $('<div/>', {
-                id: env.id,
+                id: env.id,                                                                         //Creating Node for the Current environment in Graph
                 class: 'environment ' + status,
                 text: env.name,
             });
 
-            //Creating Node for postApproval
-            var postApprovalNode = $('<div/>', {
+            
+            var postApprovalNode = $('<div/>', {                                                    //Creating Node for postApproval
                 id: postApprovalNodeId,
                 class: 'postApproval ' + status,
 
@@ -299,15 +297,17 @@ VSS.ready(function () {
         DrawGraph();
 
         //OnRightClick Pop up Menu
-        $(function () {
+        $(function ()
+        {
             $('.container').contextPopup({
-                items: [
-                  { label: 'Option', action: function () { alert('clicked 1') } },
-                  { label: 'Another Thing', action: function () { alert('clicked 2') } },
-                  { label: 'Blah Blah', action: function () { alert('clicked 3') } }
-                ]
+                    items: [
+                              { label: 'Deploy', action: function () { alert('Deployed') } },
+                              { label: 'Cancel', action: function () { alert('Canceled') } },
+                              { label: 'Re-Deploy', action: function () { alert('Re-Deployed') } }
+                           ]
             });
         });
+
 
 
         //Hover Function
@@ -328,7 +328,8 @@ VSS.ready(function () {
 
                     if (releasedEnvironment.preapproval_list.length != 0)
                     {
-                        for (var approver in releasedEnvironment.preapproval_list) {
+                        for (var approver in releasedEnvironment.preapproval_list)
+                        {
                             EnvironmentInformation = EnvironmentInformation + releasedEnvironment.preapproval_list[approver];
                         }
                     }
@@ -337,10 +338,12 @@ VSS.ready(function () {
 
                     if (releasedEnvironment.postapproval_list.length != 0)
                     {
-                        for (var approver in releasedEnvironment.postapproval_list) {
+                        for (var approver in releasedEnvironment.postapproval_list)
+                        {
                             EnvironmentInformation = EnvironmentInformation + releasedEnvironment.postapproval_list[approver];
                         }
                     }
+
                     EnvironmentInformation = EnvironmentInformation + "<br>";
 
                     EnvironmentInformation = EnvironmentInformation + "Release: " + release_name + "<br>";
@@ -359,12 +362,13 @@ VSS.ready(function () {
         
         );
 
+
+        //Container OnClick function
         $('.container').click(function (event)
         {
             if (event.target != this)
             {
-                
-
+             
                 for (var releasedEnvironmentIndex in ReleasedEnvironments)
                 {
                         var releasedEnvironment = ReleasedEnvironments[releasedEnvironmentIndex];
@@ -372,11 +376,25 @@ VSS.ready(function () {
                            {
                                 if( event.target.id[1] == 'r' )
                                 {
-                                     alert('pre');
+                                    $('.preApproval').contextPopup
+                                       ({
+                                           items: [
+                                                       { label: 'Approve', action: function () { alert('Approved') } },
+                                                       { label: 'Cancel', action: function () { alert('Canceled') } },
+                                                       { label: 'Reassign', action: function () { alert('Reassigned') } }
+                                           ]
+                                       });
                                 }
                             else
                                 {
-                                alert('post');
+                                    $('.postApproval').contextPopup
+                                        ({
+                                            items: [
+                                                        { label: 'Approve', action: function () { alert('Approved') } },
+                                                        { label: 'Cancel', action: function () { alert('Canceled') } },
+                                                        { label: 'Reassign', action: function () { alert('Reassigned') } }
+                                                    ]
+                                        });
                                 }
                           }
                 }
@@ -393,3 +411,5 @@ VSS.ready(function () {
     }); //End of onReleaseChanged
 
 }); //End of VSS.ready
+
+}); //End of VSS.require
